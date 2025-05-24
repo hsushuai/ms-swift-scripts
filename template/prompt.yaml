@@ -1,0 +1,233 @@
+维度详情: |
+  你的任务是根据用户问题和维度列表提取问题对应的维度参数
+
+  <output-format>
+  {{"dimension_param":"DIM_NAME"}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - 维度参数的值必须是维度列表中一个元素的name值
+  </rules>
+
+  下面是用户问题和维度列表，请根据这些信息提取维度参数：
+  [Question]: {question}
+  {env}
+
+指标详情: |
+  你的任务是根据用户问题和指标列表提取问题对应的指标参数
+
+  <output-format>
+  {{"metric_param":"METRIC_NAME"}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - 指标参数的值必须是指标列表中一个元素的name值
+  </rules>
+
+  下面是用户问题和指标列表，请根据这些信息提取指标参数：
+  [Question]: {question}
+  {env}
+
+group_by: |
+  你的任务是根据用户问题和维度列表提取问题对应的分组条件
+
+  <output-format>
+  {{"groupBys":["DIM_NAME"]}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - 分组条件的值必须存在于维度列表中
+  - 当问题没有涉及分组时，直接输出空列表，即 {{"groupBys":[]}}
+  - 当问题涉及多个分组时，可以使用逗号连接，格式为{{"groupBys":["DIM_NAME1","DIM_NAME2"]}}
+  </rules>
+
+  下面是用户问题和环境，请根据这些信息提取分组条件：
+  {Input}
+  {env}
+
+where: |
+  你的任务是根据用户问题和环境提取问题对应的where条件
+
+  <output-format>
+  {{"where":"NAME=VALUE"}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - where条件的值必须存在于环境中
+  - 当问题没有涉及维度时，直接输出空where条件，即 {{"where":""}}
+  - 当问题涉及多个维度时，可以使用"AND"连接，格式为{{"where":"NAME1=VALUE1 AND NAME2=VALUE2"}}
+  - 当问题涉及多个码值时，可以使用"IN"操作，格式为{{"where":"DNAME IN ("VALUE1", "VALUE2")"}}
+  - 当问题涉及码值比较时，可以使用">", "<", ">=", "<="操作符，例如{{"where":"NAME>VALUE"}}
+  </rules>
+
+  下面是用户问题和环境，请根据这些信息提取分组条件：
+  {Input}
+
+long_where_w_ans: |
+  你的任务是根据用户问题和环境提取问题对应的where条件
+
+  <output-format>
+  {{"where":"NAME=VALUE"}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - where条件的值必须存在于环境中
+  - 当问题没有涉及维度时，直接输出空where条件，即 {{"where":""}}
+  - 当问题涉及多个维度时，可以使用"AND"连接，格式为{{"where":"NAME1=VALUE1 AND NAME2=VALUE2"}}
+  - 当问题涉及多个码值时，可以使用"IN"操作，格式为{{"where":"DNAME IN ("VALUE1", "VALUE2")"}}
+  - 当问题涉及码值比较时，可以使用">", "<", ">=", "<="操作符，例如{{"where":"NAME>VALUE"}}
+  </rules>
+
+  下面是用户问题和环境，请根据这些信息提取分组条件：
+  {question}
+  {env}
+
+metric: |
+  你的任务是根据用户问题和指标列表提取问题对应的指标
+
+  <output-format>
+  {{"metrics":["METRIC_NAME"]}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - 指标的值必须是指标列表中一个元素的name值
+  - 当问题没有涉及指标时，直接输出空列表，即 {{"metrics":[]}}
+  - 当问题涉及多个指标时，可以使用逗号连接，格式为{{"metrics":["METRIC_NAME_1","METRIC_NAME_2"]}}
+  </rules>
+
+  下面是用户问题和指标列表，请根据这些信息提取指标：
+  {question}
+  {env}
+
+order_by: |
+  你的任务是根据用户问题和指标列表提取问题对应的排序条件
+
+  <output-format>
+  {{"orderBys":["NAME ORDER_TYPE"]}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - 当问题需要筛选前N条数据时，需要添加"limit"条件，格式为{{"orderBys":["NAME ORDER_TYPE"],"limit N"}}
+  - ORDER_TYPE可选值为：asc、desc
+  - 当问题没有涉及排序时，直接输出空列表，即 {{"orderBys":[]}}
+  - 当问题涉及多个排序条件时，可以使用逗号连接，格式为{{"orderBys":["NAME1 ORDER_TYPE1","NAME2 ORDER_TYPE2"]}}
+  </rules>
+
+  下面是用户问题和指标列表，请根据这些信息提取排序条件：
+  {query}
+
+pre意图识别: |
+  你的任务是根据用户问题和环境对用户意图进行分类
+
+  <output-format>
+  {{"intent_list":["intent1","intent2"]}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - intent_list的值只能包含以下选项：["连续问", "与召回相关", "非召回相关", "维度详情", "指标详情", "维度列表", "指标列表", "数据概述", "模型列表", "闲聊", "问指标", "问码值", "问知识", "需排序", "需对比", "需分析", "需同环比", "需对比全部指标", "需占比", "需分布"]
+  - 如果意图中包含连续问这个意图，还需要提取连续问中的首个问题，例如{{"intent_list":["连续问"],"first_question":"问题内容"}}
+  </rules>
+
+  下面是用户问题和环境，请根据这些信息提取意图：
+  [Question]: {question}
+  [Metrics]: {metrics}
+  [Dimensions]:
+  {dimensions}
+
+time_dims: |
+  你的任务是根据用户问题和环境时间提取问题对应的时间维度
+
+  <output-format>
+  {{"time_dimension":["DIM_NAME"]}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - 时间维度的值必须存在于环境中
+  - 当问题没有涉及时间或时间维度不存在时，直接输出空列表，即 {{"time_dimension":[]}}
+  - 当问题涉及多个时间维度时，可以使用逗号连接，格式为{{"time_dimension":["DIM_NAME1","DIM_NAME2"]}}
+  </rules>
+
+  下面是用户问题和环境时间，请根据这些信息提取时间维度：
+  {question}
+  {env}
+
+time_range: |
+  你的任务是根据用户问题和环境时间提取问题对应的时间范围
+
+  <output-format>
+  {{"timeStartFunction":{{"year":YYYY,"month":MM,"day":DD}},"timeEndFunction":{{"year":YYYY,"month":MM,"day":DD}},"timeGranularity":"TIME_GRANULARITY"}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - timeGranularity可选值为：total、year、quarter、month、day
+  - 当用户问题没有涉及时间时，直接输出空json对象，即 {{}}
+  </rules>
+
+  下面是用户问题和环境时间，请根据这些信息提取时间范围：
+  [Question]: {question}
+  [Current Time]: {env}
+
+time归因: |
+  你的任务是根据用户问题和环境时间提取问题对应的归因时间
+
+  <output-format>
+  {{"baseTime":BASE_TIME,"compareTime":COMPARE_TIME}}
+  </output-format>
+
+  <rules>
+  - 你的输出必须是一个json对象，不要包含任何其他多余内容
+  - 当问题没有涉及时间时，直接输出空，即 {{}}
+  - 当问题没有明确两个对比时间时，输出格式中之需要包含"compareTime"，即 {{"compareTime":COMPARE_TIME}}
+  - 当问题明确了两个对比时间时，输出格式中需要同时包含"basTime"和"compareTime"，即 {{"baseTime":BASE_TIME,"compareTime":COMPARE_TIME}}
+  - 当问题涉及“近两年”、“前两年”之类的时间范围时，你需要根据当前时间提取出"basTime"和"compareTime"
+  - BASE_TIME和COMPARE_TIME都是一个json格式，字段定义如下
+      - "type": 时间粒度，可选值包括"specificYear", "specificQuarter", "specificMonth", "specificDate"
+      - "year": 年份
+      - "quarter": 季度，只有在"quarter"粒度下才有值
+      - "month": 月份，只有在"month"和"date"粒度下才有值
+      - "day": 日期，只有在"date"粒度下才有值
+  </rules>
+
+  下面是用户问题和环境时间，请根据这些信息提取时间范围：
+  [Question]: {question}
+  [Current Time]: {env}
+
+condense: |
+  你的任务是针对多轮对话场景，结合历史对话信息，补全新的用户查询的细节信息，生成一个完整的用户查询。
+
+  <thought-process>
+  判断用户问题是否属于追问：
+  - 如果不属于，直接返回原问题
+  - 如果属于，根据对话历史改写用户查询。
+    - 参考对话历史中的指标、维度、时间等信息，明确用户新问题中的指标、维度、时间等信息
+  </thought-process>
+
+  <rules>
+  - 你只需要考虑追问的情况，只补全用户追问的细节信息
+  - 对于非追问的情况，直接返回原问题
+  - 对于用户首次提问的情况，直接返回原问题
+  - 不要在查询中加入任何其他多余的信息，保留用户查询的本意
+  </rules>
+
+  <hint>
+  集团指的是宝武集团
+  股份指的是宝钢股份
+  </hint>
+
+  下面是对话历史信息：其中 <question> 标记用户问题，<response> 标记助手回答
+  {history}
+
+  下面是用户本轮的问题，你要基于上面的历史记录condense成一个新的问题，不要思考直接给出结果：
+  <new_question>
+  {new_question}
+  </new_question>

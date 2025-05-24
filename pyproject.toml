@@ -1,0 +1,13 @@
+[project]
+name = "swift"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "ms-swift[all]>=3.4.0",
+    "vllm>=0.6.1.post2",
+]
+[[tool.uv.index]]
+url = "https://mirrors.aliyun.com/pypi/simple/"
+default = true

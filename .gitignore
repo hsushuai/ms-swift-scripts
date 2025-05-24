@@ -1,0 +1,46 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VSCode and PyCharm settings
+.vscode/
+.idea/
+
+# Model weights and cache (common in ML projects)
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.h5
+*.pb
+
+# Temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+
+# OS and editor junk files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment config
+.env
+.env.*
+*.egg-info/
+
+# Ignore data, output, and logs directories
+data/
+output/
+logs/
