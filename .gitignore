@@ -44,3 +44,7 @@ desktop.ini
 data/
 output/
 logs/
+
+# Ignore uncommitted changes inside the submodule (safe for devs)
+ms-swift/*
+!.gitmodules
