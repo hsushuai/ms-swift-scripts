@@ -218,11 +218,10 @@ def merge_train_data(data_dir, qwen3=False):
         if qwen3:
             process_think_empty(f"{data_dir}/{filename}")
     merge_all_jsonl(filenames, f"{data_dir}/train.jsonl")
-    
-
+ 
 
 if __name__ == "__main__":
     # convert_train_data()
     # convert_test_data()
     # process_think_empty("data/condense-3/condense.jsonl")
-    merge_train_data("data/new_agent-6-1", qwen3=True)
+    merge_train_data("data/agent-7-1", qwen3=True)

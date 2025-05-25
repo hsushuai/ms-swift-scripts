@@ -1,42 +1,57 @@
 #!/bin/bash
-set -e  # if any command fails, the script will exit immediately
-set -u  # if any variable is not set, the script will exit immediately
+set -euo pipefail
 
-# This script is used to train the Qwen3-32B model with specific configurations.
-# It sets up the environment, defines training parameters, and runs the training process.
-# It also evaluates the model after training and logs the output.
-# Usage: bash scripts/train_agent_32b_1.sh > logs/train_agent_32b_1.log 2>&1 &
+# Trap interrupts (e.g. Ctrl+C) to kill all subprocesses
+trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT SIGTERM
 
-# arguments
+# -------------------------------------
+# Qwen3-32B Training Script (DeepSpeed Zero3 + Swift)
+# -------------------------------------
+# Usage:
+#   bash scripts/train_agent_32b_1.sh > logs/train_agent_32b_1.log 2>&1 &
+
+#######################
+# CONFIGURATION
+#######################
+MODEL_PATH="/data01/LLM_model/Qwen3-32B"
+DATA_VERSION=7-1
+DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
+BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}"
 PER_DEVICE_TRAIN_BATCH_SIZE=1
 GRADIENT_ACCUMULATION_STEPS=30
-DATA_VERSION=6-1
-BASE_OUTPUT_DIR="/data01/xushuai/code/output/new_agent/new_agent_32b_v${DATA_VERSION}"
-OUTPUT_DIR="${BASE_OUTPUT_DIR}"
+NUM_EPOCHS=4
 
-# auto increment output directory
+#######################
+# GENERATE UNIQUE OUTPUT DIR
+#######################
 TRAINING_ARGS_VERSION=1
-INCREMENT_TRAINING=0
+OUTPUT_DIR="$BASE_OUTPUT_DIR"
 while [ -d "$OUTPUT_DIR" ]; do
-    OUTPUT_DIR="${BASE_OUTPUT_DIR}_${INCREMENT_TRAINING}_${TRAINING_ARGS_VERSION}"
+    OUTPUT_DIR="${BASE_OUTPUT_DIR}_${TRAINING_ARGS_VERSION}"
     ((TRAINING_ARGS_VERSION++))
 done
 
+mkdir -p "$OUTPUT_DIR"
 echo "[INFO] Using output directory: $OUTPUT_DIR"
 
+#######################
+# TRAINING
+#######################
+echo "[INFO] Starting training..."
+
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
-OMP_NUM_THREADS=10 \
 NPROC_PER_NODE=8 \
+OMP_NUM_THREADS=16 \
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
 swift sft \
-    --model /data01/LLM_model/Qwen3-32B \
-    --dataset /data01/xushuai/code/data/new_agent-${DATA_VERSION}/train.jsonl \
-    --num_train_epochs 4 \
+    --model "$MODEL_PATH" \
+    --dataset "$DATASET_PATH" \
+    --num_train_epochs $NUM_EPOCHS \
     --per_device_train_batch_size $PER_DEVICE_TRAIN_BATCH_SIZE \
     --gradient_accumulation_steps $GRADIENT_ACCUMULATION_STEPS \
     --max_length 3400 \
     --warmup_ratio 0.1 \
-    --learning_rate 7e-6 \
+    --learning_rate 1e-5 \
     --eval_strategy no \
     --deepspeed zero3 \
     --save_only_model true \
@@ -47,19 +62,22 @@ swift sft \
     --train_type full \
     --torch_dtype bfloat16 \
     --add_version false \
-    --output_dir $OUTPUT_DIR \
-    --dataloader_num_workers 10 \
-    --dataset_num_proc 10 \
+    --output_dir "$OUTPUT_DIR" \
+    --dataloader_num_workers 16 \
+    --dataset_num_proc 16 \
     --logging_steps 1 \
     --report_to swanlab \
     --attn_impl flash_attn \
     --use_liger_kernel true
 
-# evaluation
+#######################
+# EVALUATION
+#######################
 echo "[INFO] Starting evaluation..."
+
 CUDA_VISIBLE_DEVICES=3,4 \
-python src/eval.py --model "$OUTPUT_DIR"  --qwen3
+python src/eval.py --model "$OUTPUT_DIR" --qwen3
 
-echo "[INFO] Done."
+echo "[INFO] Done. Training and evaluation complete."
 
-# bash scripts/train_all.sh > run.log 2>&1 &
+# End of script
