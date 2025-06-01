@@ -195,16 +195,19 @@ def process_think_empty(filename):
         num_think_empty = 0
         for line in f:
             data.append(json.loads(line))
-    for messages in data:
-        if re.search(r"<think>\s*</think>", messages["messages"][-1]["content"]):
+    for d in data:
+        messages = d["messages"]
+        messages = [{"role": m["role"], "content": m["content"].strip()} for m in messages]
+        if re.search(r"<think>\s*</think>", messages[-1]["content"]):
             num_think_empty += 1
-            res = messages["messages"][-1]["content"].split("</think>")[-1]
-            if "/no_think" not in messages["messages"][-2]["content"]:
-                messages["messages"][-2]["content"] += " /no_think"
-                messages["messages"][-1]["content"] = f"<think>\n\n</think>\n\n{res}"
+            res = messages[-1]["content"].split("</think>")[-1].strip()
+            messages[-1]["content"] = f"<think>\n\n</think>\n\n{res}"
+            if "/no_think" not in messages[-2]["content"]:
+                messages[-2]["content"] += " /no_think"
+        d["messages"] = messages
     with open(filename, "w") as f:
-        for messages in data:
-            f.write(json.dumps(messages, ensure_ascii=False) + "\n")
+        for d in data:
+            f.write(json.dumps(d, ensure_ascii=False) + "\n")
     print(f"Processed {filename} with {num_think_empty}/{len(data)} records containing empty <think> tags.")
 
 
@@ -218,10 +221,10 @@ def merge_train_data(data_dir, qwen3=False):
         if qwen3:
             process_think_empty(f"{data_dir}/{filename}")
     merge_all_jsonl(filenames, f"{data_dir}/train.jsonl")
- 
+
 
 if __name__ == "__main__":
     # convert_train_data()
     # convert_test_data()
     # process_think_empty("data/condense-3/condense.jsonl")
-    merge_train_data("data/agent-7-1", qwen3=True)
+    merge_train_data("data/agent-12", qwen3=True)

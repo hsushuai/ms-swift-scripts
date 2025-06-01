@@ -16,10 +16,9 @@ trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT S
 MODEL_PATH="/data01/LLM_model/Qwen3-32B"
 DATA_VERSION=12
 DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
-BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}"
+BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}_packing"
 PER_DEVICE_TRAIN_BATCH_SIZE=2
 GRADIENT_ACCUMULATION_STEPS=16
-MAX_STEPS=206
 
 #######################
 # GENERATE UNIQUE OUTPUT DIR
@@ -56,9 +55,8 @@ swift sft \
     --save_only_model true \
     --gradient_checkpointing \
     --ddp_backend nccl \
-    --save_strategy steps \
-    --max_steps $MAX_STEPS \
-    --save_steps $MAX_STEPS \
+    --num_train_epochs 4 \
+    --save_strategy epoch \
     --save_total_limit 1 \
     --train_type full \
     --torch_dtype bfloat16 \
@@ -69,7 +67,8 @@ swift sft \
     --logging_steps 1 \
     --report_to swanlab \
     --attn_impl flash_attn \
-    --use_liger_kernel true
+    --use_liger_kernel true \
+    --packing
 
 #######################
 # EVALUATION

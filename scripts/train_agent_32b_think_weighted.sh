@@ -16,7 +16,7 @@ trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT S
 MODEL_PATH="/data01/LLM_model/Qwen3-32B"
 DATA_VERSION=12
 DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
-BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}"
+BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}_think_weighted"
 PER_DEVICE_TRAIN_BATCH_SIZE=2
 GRADIENT_ACCUMULATION_STEPS=16
 MAX_STEPS=206
@@ -69,7 +69,8 @@ swift sft \
     --logging_steps 1 \
     --report_to swanlab \
     --attn_impl flash_attn \
-    --use_liger_kernel true
+    --use_liger_kernel true \
+    --loss_type think_weighted
 
 #######################
 # EVALUATION

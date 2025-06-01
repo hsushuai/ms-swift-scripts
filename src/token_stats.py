@@ -74,4 +74,4 @@ def main(data_dir: str, tokenizer_name: str, model_length: int=None):
 
 
 if __name__ == "__main__":
-    main("/data01/xushuai/code/data/agent-6", "/data01/LLM_model/Qwen3-32B", model_length=3400)
+    main("/data01/xushuai/code/data/agent-6", "/data01/LLM_model/Qwen3-32B", model_length=4000)

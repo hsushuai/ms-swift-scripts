@@ -57,7 +57,7 @@ def main(args):
     results = {}
     for d, output in zip(test_data, outputs):
         result = output.outputs[0].text.strip()
-        print(result)
+        # print(result)
         if "</think>" in result:
             result = result.split("</think>")[-1].strip()
         tgt = d["messages"][-1]["content"].split("</think>")[-1].strip()

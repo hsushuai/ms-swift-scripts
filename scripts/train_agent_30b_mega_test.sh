@@ -14,16 +14,17 @@ trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT S
 #######################
 # CONFIGURATION
 #######################
-MICRO_BATCH_SIZE=1
-GLOBAL_BATCH_SIZE=240  # MUST BE MULTIPLE OF 8
-TENSOR_PARALLEL_SIZE=4
-EXPERT_PARALLEL_SIZE=2
-DATA_VERSION=7-1
-TRAIN_ITERS=200
+MICRO_BATCH_SIZE=32
+GLOBAL_BATCH_SIZE=320  # MUST BE MULTIPLE OF 8
+TP=4
+PP=1
+EP=2
+DATA_VERSION=10
+TRAIN_ITERS=208
 LR_WARMUP_ITERS=$(( TRAIN_ITERS / 10 ))
 
-BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_30b_v${DATA_VERSION}"
-DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
+BASE_OUTPUT_DIR="/data01/xushuai/code/test/agent/agent_30b_v${DATA_VERSION}"
+DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/brain_0526.jsonl"
 MODEL_LOAD_PATH="/data01/LLM_model/Qwen3-30B-A3B-mcore"
 
 #######################
@@ -49,21 +50,29 @@ echo "[INFO] Starting training..."
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 OMP_NUM_THREADS=16 \
 NPROC_PER_NODE=8 \
+UB_SKIPMC=1 \
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
 megatron sft \
     --load "$MODEL_LOAD_PATH" \
     --dataset "$DATASET_PATH" \
-    --tensor_model_parallel_size $TENSOR_PARALLEL_SIZE \
-    --expert_model_parallel_size $EXPERT_PARALLEL_SIZE \
+    --tensor_model_parallel_size $TP \
+    --expert_model_parallel_size $EP \
+    --pipeline_model_parallel_size $PP \
     --moe_grouped_gemm true \
     --moe_shared_expert_overlap true \
     --moe_aux_loss_coeff 0.01 \
+    --tp_comm_overlap \
+    --overlap_grad_reduce \
+    --overlap_param_gather \
+    --use_distributed_optimizer \
+    --moe_expert_capacity_factor 1.0 \
     --micro_batch_size $MICRO_BATCH_SIZE \
     --global_batch_size $GLOBAL_BATCH_SIZE \
     --recompute_granularity full \
     --recompute_method uniform \
-    --recompute_num_layers 1 \
+    --recompute_num_layers 12 \
     --train_iters $TRAIN_ITERS \
+    --moe_token_dispatcher_type alltoall \
     --finetune true \
     --cross_entropy_loss_fusion true \
     --lr 1e-5 \
@@ -71,15 +80,15 @@ megatron sft \
     --min_lr 0 \
     --save "$MEGATRON_OUTPUT_DIR" \
     --save_interval $TRAIN_ITERS \
-    --max_length 3400 \
+    --max_length 4000 \
     --num_workers 16 \
+    --bf16 true \
     --dataset_num_proc 16 \
     --no_save_optim true \
     --no_save_rng true \
     --sequence_parallel true \
     --use_flash_attn true \
-    --wandb_project dipeak-agent \
-    --wandb_exp_name $OUTPUT_DIR \
+    --packing true \
     --log_interval 1 \
     --add_version false \
     --split_dataset_ratio 0

@@ -29,6 +29,7 @@ venv/
 *.tmp
 *.bak
 *.swp
+tmp/
 
 # OS and editor junk files
 .DS_Store

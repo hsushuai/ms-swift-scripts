@@ -8,18 +8,18 @@ trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT S
 # Qwen3-32B Training Script (DeepSpeed Zero3 + Swift)
 # -------------------------------------
 # Usage:
-#   bash scripts/train_agent_32b_1.sh > logs/train_agent_32b_1.log 2>&1 &
+#   bash scripts/train_agent_32b.sh > logs/train_agent_32b.log 2>&1 &
 
 #######################
 # CONFIGURATION
 #######################
 MODEL_PATH="/data01/LLM_model/Qwen3-32B"
-DATA_VERSION=7-1
+DATA_VERSION=12
 DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
-BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}"
-PER_DEVICE_TRAIN_BATCH_SIZE=1
-GRADIENT_ACCUMULATION_STEPS=30
-NUM_EPOCHS=4
+BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}_think_empty"
+PER_DEVICE_TRAIN_BATCH_SIZE=2
+GRADIENT_ACCUMULATION_STEPS=16
+MAX_STEPS=206
 
 #######################
 # GENERATE UNIQUE OUTPUT DIR
@@ -46,10 +46,9 @@ PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
 swift sft \
     --model "$MODEL_PATH" \
     --dataset "$DATASET_PATH" \
-    --num_train_epochs $NUM_EPOCHS \
     --per_device_train_batch_size $PER_DEVICE_TRAIN_BATCH_SIZE \
     --gradient_accumulation_steps $GRADIENT_ACCUMULATION_STEPS \
-    --max_length 3400 \
+    --max_length 4000 \
     --warmup_ratio 0.1 \
     --learning_rate 1e-5 \
     --eval_strategy no \
@@ -57,7 +56,9 @@ swift sft \
     --save_only_model true \
     --gradient_checkpointing \
     --ddp_backend nccl \
-    --save_strategy epoch \
+    --save_strategy steps \
+    --max_steps $MAX_STEPS \
+    --save_steps $MAX_STEPS \
     --save_total_limit 1 \
     --train_type full \
     --torch_dtype bfloat16 \
@@ -68,7 +69,8 @@ swift sft \
     --logging_steps 1 \
     --report_to swanlab \
     --attn_impl flash_attn \
-    --use_liger_kernel true
+    --use_liger_kernel true \
+    --loss_type think_empty
 
 #######################
 # EVALUATION
