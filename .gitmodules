@@ -1,2 +1,7 @@
 [submodule "ms-swift"]
-	url = https://github.com/hsushuai/ms-swift.git
+    path = ms-swift
+    url = https://github.com/hsushuai/ms-swift.git
+
+[submodule "Megatron-DeepSpeed"]
+    path = Megatron-DeepSpeed
+    url = https://github.com/deepspeedai/Megatron-DeepSpeed.git
