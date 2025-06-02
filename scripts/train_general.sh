@@ -49,6 +49,7 @@ swift sft \
     --dataset_num_proc 10 \
     --logging_steps 1 \
     --report_to swanlab \
+    --swanlab_project dipeak-agent \
     --attn_impl flash_attn \
     --use_liger_kernel true \
 

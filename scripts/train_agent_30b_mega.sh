@@ -15,13 +15,13 @@ trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT S
 # CONFIGURATION
 #######################
 MICRO_BATCH_SIZE=1
-GLOBAL_BATCH_SIZE=320  # MUST BE MULTIPLE OF 8
+GLOBAL_BATCH_SIZE=512  # MUST BE MULTIPLE OF 8
 TP=4
 PP=1
 EP=2
 # DP = WORLD_SIZE / (TP * PP)
 DATA_VERSION=12
-TRAIN_ITERS=206
+TRAIN_ITERS=103
 LR_WARMUP_ITERS=$(( TRAIN_ITERS / 10 ))
 
 BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_30b_v${DATA_VERSION}"
