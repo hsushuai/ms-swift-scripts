@@ -14,16 +14,14 @@ trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT S
 #######################
 # CONFIGURATION
 #######################
-MICRO_BATCH_SIZE=1
-GLOBAL_BATCH_SIZE=512  # MUST BE MULTIPLE OF 8
-TP=4
-PP=1
+MICRO_BATCH_SIZE=2
+GLOBAL_BATCH_SIZE=232  # MUST BE MULTIPLE OF 8
+TP=2
+PP=2
 EP=2
+# TP * EP * PP = WORLD_SIZE
 # DP = WORLD_SIZE / (TP * PP)
-DATA_VERSION=12
-TRAIN_ITERS=103
-LR_WARMUP_ITERS=$(( TRAIN_ITERS / 10 ))
-
+DATA_VERSION=16  # data_size = 3074  # packing
 BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_30b_v${DATA_VERSION}"
 DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
 MODEL_LOAD_PATH="/data01/LLM_model/Qwen3-30B-A3B-mcore"
@@ -51,7 +49,6 @@ echo "[INFO] Starting training..."
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 OMP_NUM_THREADS=16 \
 NPROC_PER_NODE=8 \
-UB_SKIPMC=1 \
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
 megatron sft \
     --load "$MODEL_LOAD_PATH" \
@@ -62,21 +59,22 @@ megatron sft \
     --moe_grouped_gemm true \
     --moe_aux_loss_coeff 0.01 \
     --use_distributed_optimizer \
+    --moe_token_dispatcher_type alltoall \
     --moe_expert_capacity_factor 1.0 \
     --micro_batch_size $MICRO_BATCH_SIZE \
     --global_batch_size $GLOBAL_BATCH_SIZE \
     --recompute_granularity full \
     --recompute_method uniform \
-    --recompute_num_layers 12 \
-    --train_iters $TRAIN_ITERS \
-    --moe_token_dispatcher_type alltoall \
+    --recompute_num_layers 24 \
+    --max_epochs 4 \
+    --packing true \
     --finetune true \
     --cross_entropy_loss_fusion true \
     --lr 1e-5 \
-    --lr_warmup_iters $LR_WARMUP_ITERS \
-    --min_lr 0 \
+    --lr_warmup_iters 0 \
+    --min_lr 1e-6 \
+    --eval_iters 0 \
     --save "$MEGATRON_OUTPUT_DIR" \
-    --save_interval $TRAIN_ITERS \
     --max_length 4000 \
     --num_workers 16 \
     --bf16 true \

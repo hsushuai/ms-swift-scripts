@@ -14,12 +14,12 @@ trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT S
 # CONFIGURATION
 #######################
 MODEL_PATH="/data01/LLM_model/Qwen3-32B"
-DATA_VERSION=12
+DATA_VERSION=19  # data_size = 13776
 DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
 BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}"
 PER_DEVICE_TRAIN_BATCH_SIZE=2
 GRADIENT_ACCUMULATION_STEPS=16
-MAX_STEPS=206
+MAX_STEPS=215
 
 #######################
 # GENERATE UNIQUE OUTPUT DIR
@@ -48,7 +48,7 @@ swift sft \
     --dataset "$DATASET_PATH" \
     --per_device_train_batch_size $PER_DEVICE_TRAIN_BATCH_SIZE \
     --gradient_accumulation_steps $GRADIENT_ACCUMULATION_STEPS \
-    --max_length 4000 \
+    --max_length 4500 \
     --warmup_ratio 0.1 \
     --learning_rate 1e-5 \
     --eval_strategy no \
@@ -70,7 +70,8 @@ swift sft \
     --report_to swanlab \
     --swanlab_project dipeak-agent \
     --attn_impl flash_attn \
-    --use_liger_kernel true
+    --use_liger_kernel true \
+    --padding_free true
 
 #######################
 # EVALUATION
