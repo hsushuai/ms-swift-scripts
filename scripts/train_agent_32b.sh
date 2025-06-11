@@ -10,20 +10,19 @@ trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT S
 # Usage:
 #   bash scripts/train_agent_32b.sh > logs/train_agent_32b.log 2>&1 &
 
-#######################
-# CONFIGURATION
-#######################
+# =====================
+#     CONFIGURATION
+# =====================
 MODEL_PATH="/data01/LLM_model/Qwen3-32B"
-DATA_VERSION=19  # data_size = 13776
+DATA_VERSION=20  # data_size = 13788
 DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
 BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}"
-PER_DEVICE_TRAIN_BATCH_SIZE=2
-GRADIENT_ACCUMULATION_STEPS=16
-MAX_STEPS=215
+PER_DEVICE_TRAIN_BATCH_SIZE=1
+GRADIENT_ACCUMULATION_STEPS=32
 
-#######################
-# GENERATE UNIQUE OUTPUT DIR
-#######################
+# ====================
+#      OUTPUT DIR
+# ====================
 TRAINING_ARGS_VERSION=1
 OUTPUT_DIR="$BASE_OUTPUT_DIR"
 while [ -d "$OUTPUT_DIR" ]; do
@@ -34,9 +33,9 @@ done
 mkdir -p "$OUTPUT_DIR"
 echo "[INFO] Using output directory: $OUTPUT_DIR"
 
-#######################
-# TRAINING
-#######################
+# ====================
+#       TRAINING
+# ====================
 echo "[INFO] Starting training..."
 
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
@@ -52,13 +51,12 @@ swift sft \
     --warmup_ratio 0.1 \
     --learning_rate 1e-5 \
     --eval_strategy no \
-    --deepspeed zero3 \
+    --deepspeed ds_config/zero3.json \
     --save_only_model true \
     --gradient_checkpointing \
     --ddp_backend nccl \
-    --save_strategy steps \
-    --max_steps $MAX_STEPS \
-    --save_steps $MAX_STEPS \
+    --save_strategy epoch \
+    --num_train_epochs 4 \
     --save_total_limit 1 \
     --train_type full \
     --torch_dtype bfloat16 \
@@ -71,11 +69,12 @@ swift sft \
     --swanlab_project dipeak-agent \
     --attn_impl flash_attn \
     --use_liger_kernel true \
-    --padding_free true
+    --loss_type channel_loss \
+    --channels 'attr_rewrite_0522_v1' 'condense' 'extract_params_train' 'attr_rewrite_0603_v1' 'judge_training_0610' 'brain_train_0611' 'bi_0611' 'attr_metric_where_dist_0530_v1' 'tican_0528' 'generation_traindatav8'
 
-#######################
-# EVALUATION
-#######################
+# =====================
+#      EVALUATION
+# =====================
 echo "[INFO] Starting evaluation..."
 
 CUDA_VISIBLE_DEVICES=3,4 \

@@ -19,7 +19,7 @@ def to_jsonl(filename, template, variables, process_fn=None, output=None, metada
         if pd.isna(row[variables[-1]]):
             continue
         prompt = template.format(**{k: str(row[k]).strip() for k in variables[:-1]})
-        result = {"messages": [{"role": "user", "content": prompt}, {"role": "assistant", "content": f"<think>\n\n</think>{row[variables[-1]]}"}]}
+        result = {"messages": [{"role": "user", "content": prompt}, {"role": "assistant", "content": f"<think>\n\n</think>\n\n{row[variables[-1]]}"}]}
         if metadata:
             result["metadata"] = metadata
         results.append(result)
@@ -212,19 +212,35 @@ def process_think_empty(filename):
 
 
 def merge_train_data(data_dir, qwen3=False):
-    filenames = []
-    for filename in os.listdir(data_dir):
-        if filename == "train.jsonl":
-            continue 
-        if filename.endswith(".jsonl"):
-            filenames.append(f"{data_dir}/{filename}")
+    filenames = [f"{data_dir}/{d}" for d in os.listdir(data_dir) if d != "train.jsonl" and d.endswith(".jsonl")]
+    channels = set()
+    for filename in filenames:
+        # add channel info
+        channel = filename.split("/")[-1].replace(".jsonl", "")
+        channels.add(channel)
+        with open(filename) as f:
+            data = []
+            for line in f:
+                d = json.loads(line)
+                d["channel"] = channel
+                data.append(d)
+        with open(filename, "w") as f:
+            for d in data:
+                f.write(json.dumps(d, ensure_ascii=False) + "\n")
         if qwen3:
-            process_think_empty(f"{data_dir}/{filename}")
+            process_think_empty(filename)
     merge_all_jsonl(filenames, f"{data_dir}/train.jsonl")
+    len_str = sum(len(ch) + 2 + 1 for ch in channels) - 1
+    len_pre_space = (len_str - len("Channels")) // 2
+    print("=" * len_str)
+    print(" " * len_pre_space + "Channels")
+    print("-" * len_str)
+    print(' '.join(f"'{ch}'" for ch in channels))
+    print("=" * len_str)
 
 
 if __name__ == "__main__":
     # convert_train_data()
     # convert_test_data()
     # process_think_empty("data/condense-3/condense.jsonl")
-    merge_train_data("data/agent-19", qwen3=True)
+    merge_train_data("data/agent-20", qwen3=True)
