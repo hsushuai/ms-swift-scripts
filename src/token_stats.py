@@ -27,7 +27,8 @@ def compute_token_stats(jsonl_path: str, tokenizer_name: str, model_length: int=
     with open(jsonl_path, encoding="utf-8") as f:
         for line in f:
             data = json.loads(line)
-            messages = data.get("messages", [])
+            messages = data.get("messages", [])[-1:]
+            messages[-1]["content"] = messages[-1]["content"].split("<think>")[-1].split("</think>")[0].strip()
             full_text = tokenizer.apply_chat_template(messages, tokenize=False)
             tokens = tokenizer(full_text, add_special_tokens=False)
             token_lengths.append(len(tokens["input_ids"]))
@@ -74,4 +75,4 @@ def main(data_dir: str, tokenizer_name: str, model_length: int=None):
 
 
 if __name__ == "__main__":
-    main("/data01/xushuai/code/data/agent-18", "/data01/LLM_model/Qwen3-32B", model_length=4500)
+    main("/data01/xushuai/code/data/agent-21", "/data01/LLM_model/Qwen3-32B", model_length=4500)

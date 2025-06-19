@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "deepspeed>=0.16.9",
     "ms-swift[all]>=3.4.0",
+    "transformer-engine>=2.4.0",
     "vllm>=0.6.1.post2",
 ]
 [[tool.uv.index]]

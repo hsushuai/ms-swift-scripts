@@ -13,13 +13,13 @@ trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT S
 # =====================
 #     CONFIGURATION
 # =====================
-MODEL_PATH="/data01/LLM_model/Qwen3-32B"
-DATA_VERSION=23  # data_size = 14268
+MODEL_PATH="/data01/LLM_model/DeepSeek-R1-Distill-Qwen-7B"
+DATA_VERSION=20  # data_size = 13788
 DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
-BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}"
-PER_DEVICE_TRAIN_BATCH_SIZE=1
-GRADIENT_ACCUMULATION_STEPS=43
-MAX_STEPS=221
+BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_ds_7b_v${DATA_VERSION}"
+PER_DEVICE_TRAIN_BATCH_SIZE=4
+GRADIENT_ACCUMULATION_STEPS=32
+MAX_STEPS=216
 
 # ====================
 #      OUTPUT DIR
@@ -38,8 +38,8 @@ echo "[INFO] Using output directory: $OUTPUT_DIR"
 # ====================
 echo "[INFO] Starting training..."
 
-CUDA_VISIBLE_DEVICES=2,3,4,5,6,7 \
-NPROC_PER_NODE=6 \
+CUDA_VISIBLE_DEVICES=2,3 \
+NPROC_PER_NODE=2 \
 OMP_NUM_THREADS=16 \
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
 swift sft \
@@ -70,8 +70,7 @@ swift sft \
     --swanlab_project dipeak-agent \
     --attn_impl flash_attn \
     --use_liger_kernel true \
-    --loss_type channel_loss \
-    --channels 'extract_params_train' 'brain_train_0619' 'attr_rewrite_0522_v1' 'condense' 'bi_0619' 'judge_training_0610' 'generation_traindatav9' 'attr_metric_where_dist_0530_v1' 'tican_0528' 'attr_rewrite_0603_v1'
+    --padding_free true
 
 # =====================
 #      EVALUATION

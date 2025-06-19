@@ -243,4 +243,4 @@ if __name__ == "__main__":
     # convert_train_data()
     # convert_test_data()
     # process_think_empty("data/condense-3/condense.jsonl")
-    merge_train_data("data/agent-20", qwen3=True)
+    merge_train_data("data/agent-23", qwen3=True)
