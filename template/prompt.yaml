@@ -188,8 +188,12 @@ time归因: |
   - 你的输出必须是一个json对象，不要包含任何其他多余内容
   - 当问题没有涉及时间时，直接输出空，即 {{}}
   - 当问题没有明确两个对比时间时，输出格式中之需要包含"compareTime"，即 {{"compareTime":COMPARE_TIME}}
-  - 当问题明确了两个对比时间时，输出格式中需要同时包含"basTime"和"compareTime"，即 {{"baseTime":BASE_TIME,"compareTime":COMPARE_TIME}}
-  - 当问题涉及“近两年”、“前两年”之类的时间范围时，你需要根据当前时间提取出"basTime"和"compareTime"
+  - 当问题明确了两个对比时间时，输出格式中需要同时包含"baseTime"和"compareTime"，即 {{"baseTime":BASE_TIME,"compareTime":COMPARE_TIME}}
+  - 当问题涉及“近两年”、“前两年”之类的时间范围时，你需要根据当前时间提取出"baseTime"和"compareTime"
+  - 当问题没有明确"baseTime"时，取"compareTime"前一个时间粒度的时间作为"baseTime"，例如
+    - 如果"compareTime"是某月，则"baseTime"取前一个月
+    - 如果"compareTime"是某季度，则"baseTime"取前一个季度
+    - 如果"compareTime"是某年，则"baseTime"取前一年
   - BASE_TIME和COMPARE_TIME都是一个json格式，字段定义如下
       - "type": 时间粒度，可选值包括"specificYear", "specificQuarter", "specificMonth", "specificDate"
       - "year": 年份

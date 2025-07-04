@@ -17,19 +17,14 @@ MODEL_PATH="/data01/LLM_model/Qwen3-32B"
 DATA_VERSION=23  # data_size = 14268
 DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
 BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}"
-PER_DEVICE_TRAIN_BATCH_SIZE=1
-GRADIENT_ACCUMULATION_STEPS=43
-MAX_STEPS=221
+PER_DEVICE_TRAIN_BATCH_SIZE=11
+GRADIENT_ACCUMULATION_STEPS=4
+MAX_STEPS=216
 
 # ====================
 #      OUTPUT DIR
 # ====================
-TRAINING_ARGS_VERSION=1
 OUTPUT_DIR="$BASE_OUTPUT_DIR"
-while [ -d "$OUTPUT_DIR" ]; do
-    OUTPUT_DIR="${BASE_OUTPUT_DIR}_${TRAINING_ARGS_VERSION}"
-    ((TRAINING_ARGS_VERSION++))
-done
 
 echo "[INFO] Using output directory: $OUTPUT_DIR"
 
@@ -51,7 +46,7 @@ swift sft \
     --warmup_ratio 0.1 \
     --learning_rate 1e-5 \
     --eval_strategy no \
-    --deepspeed zero3 \
+    --deepspeed ds_config/zero3.json \
     --save_only_model true \
     --gradient_checkpointing \
     --ddp_backend nccl \

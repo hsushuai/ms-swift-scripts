@@ -30,7 +30,7 @@ def to_jsonl(filename, template, variables, process_fn=None, output=None, metada
         for result in results:
             f.write(json.dumps(result, ensure_ascii=False) + "\n")
     print(f"Processed {filename} to {output} with {len(results)} records.")
-    show_message(results)
+    # show_message(results)
 
 
 def dims_formal(a):
@@ -50,7 +50,7 @@ def metrics_formal(a):
     if pd.isna(a):
         return "[]"
     return "[" + a + "]"
-    
+
 
 def process_train_intent(df):
     intents = ["连续问", "与召回相关", "非召回相关", "维度详情", "指标详情", "维度列表", "指标列表", "数据概述", "模型列表", "闲聊", "问指标", "问码值", "问知识", "需排序", "需对比", "需分析", "需同环比", "需对比全部指标", "需占比", "需分布"]
@@ -145,8 +145,8 @@ def convert_test_data():
     
     # Process test data
     test_data_files = [
-        {"name": "维度详情", "description": "metric detail", "path": "data/general-raw/raw/test/维度详情 - 测试集.csv", "variables": ["question", "env", "ground_truth"]},
-        {"name": "指标详情", "description": "dimension detail", "path": "data/general-raw/raw/test/指标详情 - 测试集.csv", "variables": ["question", "env", "ground_truth"]},
+        {"name": "维度详情", "description": "dimension detail", "path": "data/general-raw/raw/test/维度详情 - 测试集.csv", "variables": ["question", "env", "ground_truth"]},
+        {"name": "指标详情", "description": "metric detail", "path": "data/general-raw/raw/test/指标详情 - 测试集.csv", "variables": ["question", "env", "ground_truth"]},
         {"name": "group_by", "description": "groupby", "path": "data/general-raw/raw/test/提参测试集.csv", "variables": ["Input", "env", "groupby ground_truth"], "process_fn": process_test_groupby, "output": "data/processed/test/提参测试集_groupby.jsonl"},
         {"name": "where", "description": "where", "path": "data/general-raw/raw/test/提参测试集.csv", "variables": ["Input", "where ground_truth"], "output": "data/processed/test/提参测试集_where.jsonl"},
         {"name": "metric", "description": "metric", "path": "data/general-raw/raw/test/提参测试集.csv", "variables": ["question", "env", "metric ground_truth"], "process_fn": process_test_metric, "output": "data/processed/test/提参测试集_metric.jsonl"},
@@ -243,4 +243,4 @@ if __name__ == "__main__":
     # convert_train_data()
     # convert_test_data()
     # process_think_empty("data/condense-3/condense.jsonl")
-    merge_train_data("data/agent-23", qwen3=True)
+    merge_train_data("data/agent-28", qwen3=True)

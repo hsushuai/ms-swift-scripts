@@ -42,4 +42,4 @@ def check_data(data_dir):
 
 
 if __name__ == "__main__":
-    check_data("data/agent-20")
+    check_data("data/agent-26")

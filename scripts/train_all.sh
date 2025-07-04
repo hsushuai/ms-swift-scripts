@@ -13,7 +13,10 @@ log_dir="${script_dir}/../logs"
 mkdir -p "$log_dir"
 
 # List of training script filenames (assumed in same directory)
-train_scripts=("train_agent_32b.sh")
+train_scripts=(
+  "train_agent_14b.sh"
+  "train_agent_32b_padding_free.sh"
+)
 
 # Main log file path
 main_log="${log_dir}/run.log"

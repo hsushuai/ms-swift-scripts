@@ -14,24 +14,13 @@ trap "echo 'Interrupted. Killing subprocesses...'; pkill -P $$; exit 1" SIGINT S
 # CONFIGURATION
 #######################
 MODEL_PATH="/data01/LLM_model/Qwen3-32B"
-DATA_VERSION=12
+DATA_VERSION=25  # data_size = 14130
 DATASET_PATH="/data01/xushuai/code/data/agent-${DATA_VERSION}/train.jsonl"
-BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}_think_empty"
+BASE_OUTPUT_DIR="/data01/xushuai/code/output/agent/agent_32b_v${DATA_VERSION}_packing_bs512"
 PER_DEVICE_TRAIN_BATCH_SIZE=2
-GRADIENT_ACCUMULATION_STEPS=16
-MAX_STEPS=206
+GRADIENT_ACCUMULATION_STEPS=32
 
-#######################
-# GENERATE UNIQUE OUTPUT DIR
-#######################
-TRAINING_ARGS_VERSION=1
 OUTPUT_DIR="$BASE_OUTPUT_DIR"
-while [ -d "$OUTPUT_DIR" ]; do
-    OUTPUT_DIR="${BASE_OUTPUT_DIR}_${TRAINING_ARGS_VERSION}"
-    ((TRAINING_ARGS_VERSION++))
-done
-
-mkdir -p "$OUTPUT_DIR"
 echo "[INFO] Using output directory: $OUTPUT_DIR"
 
 #######################
@@ -56,10 +45,9 @@ swift sft \
     --save_only_model true \
     --gradient_checkpointing \
     --ddp_backend nccl \
-    --save_strategy steps \
-    --max_steps $MAX_STEPS \
-    --save_steps $MAX_STEPS \
-    --save_total_limit 1 \
+    --num_train_epochs 6 \
+    --save_strategy epoch \
+    --save_total_limit 3 \
     --train_type full \
     --torch_dtype bfloat16 \
     --add_version false \
@@ -71,7 +59,7 @@ swift sft \
     --swanlab_project dipeak-agent \
     --attn_impl flash_attn \
     --use_liger_kernel true \
-    --loss_type think_empty
+    --packing
 
 #######################
 # EVALUATION
